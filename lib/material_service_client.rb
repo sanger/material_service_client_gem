@@ -1,4 +1,7 @@
 require "material_service_client/version"
+require "faraday"
+require "zipkin-tracer"
+
 
 module MaterialServiceClient
 	def self.post(data)
@@ -32,7 +35,7 @@ module MaterialServiceClient
 
 	def self.get_connection
 		conn = Faraday.new(:url => Rails.application.config.material_url) do |faraday|
-		  # faraday.use ZipkinTracer::FaradayHandler, 'eve'
+		  faraday.use ZipkinTracer::FaradayHandler, 'eve'
 		  faraday.proxy Rails.application.config.material_url
 		  faraday.request  :url_encoded
 		  faraday.response :logger
