@@ -34,7 +34,7 @@ module MaterialServiceClient
 		def self.delete(uuid)
 			return nil if uuid.nil?
 			conn = MaterialServiceClient::get_connection
-			JSON.parse(conn.delete('/materials/'+uuid).body)
+			conn.delete('/materials/'+uuid)
 		end
 	end
 
@@ -69,7 +69,7 @@ module MaterialServiceClient
 
 	def self.get_connection
 		conn = Faraday.new(:url => ENV['MATERIALS_URL']) do |faraday|
-		  # faraday.use ZipkinTracer::FaradayHandler, 'eve'
+		  faraday.use ZipkinTracer::FaradayHandler, 'eve'
 		  faraday.proxy ENV['MATERIALS_URL']
 		  faraday.request  :url_encoded
 		  faraday.response :logger
