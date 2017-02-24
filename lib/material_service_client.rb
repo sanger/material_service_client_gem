@@ -1,47 +1,87 @@
 require "material_service_client/version"
-require "faraday"
-require "zipkin-tracer"
+require 'faraday'
+require 'json'
 
 
 module MaterialServiceClient
-	def self.post(data)
-		conn = get_connection
-		JSON.parse(conn.post('/materials', data.to_json).body)
+
+	class MissingSite < StandardError; end
+
+	def self.site=(site)
+		@site = site
 	end
 
-	def self.put(data)
-		uuid = data[:uuid]
-		data_to_send = data.reject{|k,v| k.to_sym == :uuid}
-
-		conn = get_connection
-		JSON.parse(conn.put('/materials/'+uuid, data_to_send.to_json).body)
+	def self.site
+		@site || ENV['MATERIALS_URL']
 	end
 
-	def self.get(uuid)
-		return nil if uuid.nil?
-		conn = get_connection
-		JSON.parse(conn.get('/materials/'+uuid).body)
-	end
+	class Base
+		def self.connection
+			url = MaterialServiceClient.site
 
-	def self.valid?(uuids)
-		conn = get_connection
-		data = { materials: uuids }
+			raise MissingSite.new, 'site must be set on MaterialServiceClient before any requests can be made' if url.nil?
 
-		response = conn.post('/materials/validate', data.to_json)
-		response.body == 'ok'
-	end
-
-	private
-
-	def self.get_connection
-		conn = Faraday.new(:url => Rails.application.config.material_url) do |faraday|
-		  faraday.use ZipkinTracer::FaradayHandler, 'eve'
-		  faraday.proxy Rails.application.config.material_url
-		  faraday.request  :url_encoded
-		  faraday.response :logger
-		  faraday.adapter  Faraday.default_adapter
+			Faraday.new(:url => url, :headers => {'Content-Type' => 'application/json'}) do |faraday|
+			  faraday.use ZipkinTracer::FaradayHandler, 'eve'
+			  faraday.proxy url
+			  faraday.request  :url_encoded
+			  faraday.response :logger
+			  faraday.adapter  Faraday.default_adapter
+			end
 		end
-		conn.headers = {'Content-Type' => 'application/json'}
-		conn
 	end
+
+	class Material < Base
+		def self.post(data)
+			JSON.parse(connection.post('/materials', data.to_json).body)
+		end
+
+		def self.put(data)
+			uuid = data[:uuid]
+			data_to_send = data.reject{|k,v| k.to_sym == :uuid}
+
+			JSON.parse(connection.put('/materials/'+uuid, data_to_send.to_json).body)
+		end
+
+		def self.get(uuid)
+			return nil if uuid.nil?
+			JSON.parse(connection.get('/materials/'+uuid).body)
+		end
+
+		def self.valid?(uuids)
+			data = { materials: uuids }
+
+			response = connection.post('/materials/validate', data.to_json)
+			response.body == 'ok'
+		end
+
+		def self.delete(uuid)
+			return nil if uuid.nil?
+			connection.delete('/materials/'+uuid)
+    end
+	end
+
+	class Container < Base
+		def self.post(data)
+			JSON.parse(connection.post('/containers', data.to_json).body)
+		end
+
+		def self.put(data)
+			uuid = data[:uuid]
+			data_to_send = data.reject{|k,v| k.to_sym == :uuid}
+
+			JSON.parse(connection.put('/containers/'+uuid, data_to_send.to_json).body)
+		end
+
+		def self.get(uuid)
+			return nil if uuid.nil?
+			JSON.parse(connection.get('/containers/'+uuid).body)
+		end
+
+		def self.delete(uuid)
+			return nil if uuid.nil?
+			connection.delete('/containers/'+uuid)
+		end
+	end
+
 end

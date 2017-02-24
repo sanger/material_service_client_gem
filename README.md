@@ -1,8 +1,8 @@
 # MaterialServiceClient
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/material_service_client`. To experiment with that code, run `bin/console` for an interactive prompt.
+A gem for communicating with the [Materials Service](https://github.com/sanger/aker-materials).
 
-TODO: Delete this and the text above, and describe your gem
+An environment variable named MATERIALS_URL must be set with the location of the Materials Service URL.
 
 ## Installation
 
@@ -22,7 +22,24 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+All methods return the parsed response from the service (except `delete` as responses are empty).
+
+```ruby
+require 'material_service_client'
+
+# Material
+MaterialServiceClient::Material.get(uuid)
+MaterialServiceClient::Material.post(material_data)
+MaterialServiceClient::Material.put(material_data)
+MaterialServiceClient::Material.delete(uuid)
+MaterialServiceClient::Material.valid?(uuids)
+
+# Container
+MaterialServiceClient::Container.get(uuid)
+MaterialServiceClient::Container.post(container_data)
+MaterialServiceClient::Container.put(container_data)
+MaterialServiceClient::Container.delete(uuid)
+```
 
 ## Development
 
