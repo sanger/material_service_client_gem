@@ -2,6 +2,7 @@ require "material_service_client/version"
 require 'faraday'
 require 'json'
 
+
 module MaterialServiceClient
 
 	class MissingSite < StandardError; end
@@ -57,7 +58,7 @@ module MaterialServiceClient
 		def self.delete(uuid)
 			return nil if uuid.nil?
 			connection.delete('/materials/'+uuid)
-		end
+    end
 	end
 
 	class Container < Base
