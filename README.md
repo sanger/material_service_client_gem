@@ -39,6 +39,7 @@ MaterialServiceClient::Container.get(uuid)
 MaterialServiceClient::Container.post(container_data)
 MaterialServiceClient::Container.put(container_data)
 MaterialServiceClient::Container.delete(uuid)
+MaterialServiceClient::Container.with_criteria({:barcode => 'MY-BARCODE'})
 ```
 
 ## Development
