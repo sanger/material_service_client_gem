@@ -73,6 +73,14 @@ module MaterialServiceClient
 			JSON.parse(connection.put('/containers/'+uuid, data_to_send.to_json).body)
 		end
 
+		def self.with_criteria(criteria)
+			data = '?'+criteria.map do |k, value|
+				"#{k.to_s}=#{value.to_json}"
+			end.join('&')
+
+			JSON.parse(connection.get('/containers'+ data).body)
+		end
+
 		def self.get(uuid)
 			return nil if uuid.nil?
 			JSON.parse(connection.get('/containers/'+uuid).body)
