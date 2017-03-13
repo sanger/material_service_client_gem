@@ -1,6 +1,8 @@
 require "material_service_client/version"
 require 'faraday'
 require 'json'
+require 'faraday_middleware'
+require 'material_service_client/middleware/status'
 
 
 module MaterialServiceClient
@@ -27,6 +29,7 @@ module MaterialServiceClient
 			  faraday.request  :url_encoded
 			  faraday.response :logger
 			  faraday.adapter  Faraday.default_adapter
+			  faraday.use MaterialServiceClient::Middleware::Status
 			end
 		end
 	end
