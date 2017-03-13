@@ -22,8 +22,11 @@ module MaterialServiceClient
 			url = MaterialServiceClient.site
 
 			raise MissingSite.new, 'site must be set on MaterialServiceClient before any requests can be made' if url.nil?
+			adapter_options = Array(Faraday.default_adapter)
 
 			Faraday.new(:url => url, :headers => {'Content-Type' => 'application/json'}) do |faraday|
+			  faraday.adapter(*adapter_options)
+
 			  faraday.use ZipkinTracer::FaradayHandler, 'eve'
 			  faraday.proxy url
 			  faraday.request  :url_encoded
