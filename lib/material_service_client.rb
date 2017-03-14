@@ -1,6 +1,8 @@
 require "material_service_client/version"
 require 'faraday'
 require 'json'
+require 'faraday_middleware'
+require 'material_service_client/middleware/status'
 
 
 module MaterialServiceClient
@@ -20,13 +22,16 @@ module MaterialServiceClient
 			url = MaterialServiceClient.site
 
 			raise MissingSite.new, 'site must be set on MaterialServiceClient before any requests can be made' if url.nil?
+			adapter_options = Array(Faraday.default_adapter)
 
 			Faraday.new(:url => url, :headers => {'Content-Type' => 'application/json'}) do |faraday|
+			  faraday.adapter(*adapter_options)
+
 			  faraday.use ZipkinTracer::FaradayHandler, 'eve'
 			  faraday.proxy url
 			  faraday.request  :url_encoded
 			  faraday.response :logger
-			  faraday.adapter  Faraday.default_adapter
+			  faraday.use MaterialServiceClient::Middleware::Status
 			end
 		end
 	end
