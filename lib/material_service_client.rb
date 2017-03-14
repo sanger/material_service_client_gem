@@ -31,7 +31,6 @@ module MaterialServiceClient
 			  faraday.proxy url
 			  faraday.request  :url_encoded
 			  faraday.response :logger
-			  faraday.adapter  Faraday.default_adapter
 			  faraday.use MaterialServiceClient::Middleware::Status
 			end
 		end
